@@ -78,7 +78,7 @@ if device == 'cuda':
     # net = torch.nn.DataParallel(net)
     cudnn.benchmark = True
 
-net = extend(net, use_converter=True)
+net = extend(net)  # use_converter=True
 
 if args.resume:
     # Load checkpoint.
