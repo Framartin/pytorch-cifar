@@ -32,7 +32,7 @@ class VGG(nn.Module):
             else:
                 layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
                            nn.BatchNorm2d(x),
-                           nn.ReLU(inplace=True)]
+                           nn.ReLU()]  # removed for cockpit: inplace=True
                 in_channels = x
         layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
         return nn.Sequential(*layers)
