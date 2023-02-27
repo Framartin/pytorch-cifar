@@ -108,7 +108,7 @@ def train(epoch):
         optimizer.zero_grad()
         outputs = net(inputs)
         loss = criterion(outputs, targets)
-        losses = criterion_individual(outputs, labels)
+        losses = criterion_individual(outputs, targets)
         global_step = epoch*len(trainloader) + batch_idx
         with cockpit(
             global_step,
