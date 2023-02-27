@@ -116,7 +116,7 @@ def train(epoch):
                 "batch_size": inputs.shape[0],
                 "individual_losses": losses,
                 "loss": loss,
-                "optimizer": opt,
+                "optimizer": optimizer,
             },
         ):
             loss.backward(create_graph=cockpit.create_graph(global_step))
