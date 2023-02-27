@@ -74,7 +74,7 @@ net = ResNet18()
 # net = SimpleDLA()
 net = net.to(device)
 if device == 'cuda':
-    net = torch.nn.DataParallel(net)
+    # net = torch.nn.DataParallel(net)
     cudnn.benchmark = True
 
 net = extend(net)
