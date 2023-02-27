@@ -14,6 +14,9 @@ import argparse
 from models import *
 from utils import progress_bar
 
+from backpack import extend
+from cockpit import Cockpit, CockpitPlotter
+from cockpit.utils.configuration import configuration
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
@@ -55,7 +58,7 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer',
 # Model
 print('==> Building model..')
 # net = VGG('VGG19')
-# net = ResNet18()
+net = ResNet18()
 # net = PreActResNet18()
 # net = GoogLeNet()
 # net = DenseNet121()
@@ -68,11 +71,13 @@ print('==> Building model..')
 # net = ShuffleNetV2(1)
 # net = EfficientNetB0()
 # net = RegNetX_200MF()
-net = SimpleDLA()
+# net = SimpleDLA()
 net = net.to(device)
 if device == 'cuda':
     net = torch.nn.DataParallel(net)
     cudnn.benchmark = True
+
+net = extend(net)
 
 if args.resume:
     # Load checkpoint.
@@ -84,10 +89,12 @@ if args.resume:
     start_epoch = checkpoint['epoch']
 
 criterion = nn.CrossEntropyLoss()
+criterion_individual = torch.nn.CrossEntropyLoss(reduction="none")
 optimizer = optim.SGD(net.parameters(), lr=args.lr,
                       momentum=0.9, weight_decay=5e-4)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
 
+cockpit = Cockpit(model.parameters(), quantities=configuration("full"))
 
 # Training
 def train(epoch):
@@ -101,7 +108,19 @@ def train(epoch):
         optimizer.zero_grad()
         outputs = net(inputs)
         loss = criterion(outputs, targets)
-        loss.backward()
+        losses = criterion_individual(outputs, labels)
+        global_step = epoch*len(trainloader) + batch_idx
+        with cockpit(
+            global_step,
+            info={
+                "batch_size": inputs.shape[0],
+                "individual_losses": losses,
+                "loss": loss,
+                "optimizer": opt,
+            },
+        ):
+            loss.backward(create_graph=cockpit.create_graph(global_step))
+        # loss.backward()
         optimizer.step()
 
         train_loss += loss.item()
