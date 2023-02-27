@@ -94,7 +94,7 @@ optimizer = optim.SGD(net.parameters(), lr=args.lr,
                       momentum=0.9, weight_decay=5e-4)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
 
-cockpit = Cockpit(model.parameters(), quantities=configuration("full"))
+cockpit = Cockpit(net.parameters(), quantities=configuration("full"))
 
 # Training
 def train(epoch):
